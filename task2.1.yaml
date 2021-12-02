@@ -1,0 +1,66 @@
+version: "3.9"
+services:
+  benchmarkapp:
+    image: "nclcloudcomputing/javabenchmarkapp"
+    deploy:
+      replicas: 2 # Setup 2 instances of the container
+      resources:
+        limits: # Container usage limits
+          cpus: '0.5' # Hard limits CPU usage to 50%
+          memory: 300M # Hard limits memory usage to 100M
+        reservations:
+          cpus: '0.25' # Keep 25% of CPU usage always available for the container
+          memory: 175M # Reserve 75 MB of memory for the container
+      placement:
+        constraints: # Constraints to the placement of services
+          - "node.role==manager" # Deploy only on manager nodes
+          # - "node.labels.location==uk" Deploy to any node that contains the label key pair location==uk
+          - "node.hostname==docker-desktop" # Deploy to a specific hostname
+    ports:
+      - "8080:8080"
+      # - ^Host | ^Container
+    environment: # Environment variables. Such as $PATH
+      ENV_KEY: ENV_VALUE
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+
+  cadvisor:
+    image: "gcr.io/cadvisor/cadvisor"
+    restart: always
+    ports:
+      - "8082:8082"
+    volumes:
+      - '/:/rootfs:ro'
+      - '/var/run:/var/run:rw'
+      - '/sys:/sys:ro'
+      - '/var/lib/docker/:/var/lib/docker:ro'
+
+  locust:
+    image: "locustio/locust"
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./:/mnt/locust
+    command: -f /mnt/locust/locustfile.py
+
+  visualizer:
+    image: "dockersamples/visualizer"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    ports:
+      - "8084:8084"
