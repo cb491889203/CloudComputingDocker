@@ -1,36 +1,14 @@
 version: "3.9"
 services:
-  benchmarkapp:
-    image: "nclcloudcomputing/javabenchmarkapp"
-    deploy:
-      replicas: 1
-      resources:
-        limits: # Container usage limits
-          cpus: '0.5' # Hard limits CPU usage to 50%
-          memory: 300M # Hard limits memory usage to 100M
-        reservations:
-          cpus: '0.25' # Keep 25% of CPU usage always available for the container
-          memory: 175M # Reserve 75 MB of memory for the container
-      placement:
-        constraints: # Constraints to the placement of services
-          - "node.role==manager" # Deploy only on manager nodes
-          # - "node.labels.location==uk" Deploy to any node that contains the label key pair location==uk
-          # - "node.hostname==docker-desktop" # Deploy to a specific hostname
+  cAdvisor-scraper:
+    image: "chenbao0707/cadvisor-scrapper"
     ports:
       - "8090:8080"
-      # - ^Host | ^Container
-    environment: # Environment variables. Such as $PATH
-      ENV_KEY: ENV_VALUE
     networks:
       - nclbenchmarkNet
 
   mongo:
     image: mongo
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - "node.role==manager"
     ports:
       - "8085:27017"
     environment:
@@ -41,11 +19,6 @@ services:
 
   mongo-express:
     image: mongo-express
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - "node.role==manager"
     ports:
       - "8081:8081"
     environment:
@@ -69,7 +42,7 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:rw
-#      - /dev/disk:/dev/disk:rw
+#      - /dev/disk:/dev/disk:ro
     networks:
       - nclbenchmarkNet
 
