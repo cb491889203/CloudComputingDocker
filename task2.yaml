@@ -69,7 +69,6 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:rw
-#      - /dev/disk:/dev/disk:rw
     networks:
       - nclbenchmarkNet
 
@@ -83,7 +82,7 @@ services:
     ports:
       - "8083:8089"
     volumes:
-      - ./:/mnt/locust
+      - /E/newcastleUniversity/Modules/CloudComputing/assessment1:/mnt/locust
     command: -f /mnt/locust/locustfile.py
     networks:
       - nclbenchmarkNet
